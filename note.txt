@@ -42,14 +42,16 @@
 
 
 ----- kịch bản: browsing -----
+    alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"Request for doan.local detected!"; sid:1000002; content:"doan.local";)
+    content là tên website 
 
+----- ----- 
 
 
 
 sudo /usr/local/bin/snort -A console -q -u snort -g snort -c /etc/snort/snort.conf -i ens33
 
 
------ ----- 
 ----- -----
 ----- -----
 ----- -----

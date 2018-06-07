@@ -31,9 +31,14 @@
 ----- kịch bản: http brute force -----
     nmap -script http-brute -p 80 10.0.0.4
 
+    Tuấn:
     alert tcp EXTERNAL_NET any -> 10.0.0.4 80 (msg:"Login attempt dectected";content:"Authorization"; sid:1000001;)
     alert tcp EXTERNAL_NET any -> 10.0.0.4 80 (msg:"http-brute attempt dectected";content:"Authorization"; sid:1000001;detection_filter:track by_src, count 5, seconds 1;)
-    detection_filter:track by_src, count 5, seconds 1;
+    
+    Viễn:
+    alert tcp EXTERNAL_NET any -> 10.0.0.4 80 (msg:"Login attempt dectected";content:"Authorization"; sid:1000001;)
+    thêm dòng sau vào cuối /etc/snort/snort.conf:
+        rate_filter gen_id 1000001, sig_id 1000001, track by_src, count 5, seconds 1, new-action drop, timeout 100
 
 
 ----- kịch bản: browsing -----

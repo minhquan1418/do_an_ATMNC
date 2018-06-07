@@ -43,15 +43,25 @@
 
 ----- kịch bản: browsing -----
     alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"Request for doan.local detected!"; sid:1000002; content:"doan.local";)
-    content là tên website 
+    alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"Request for doan.local detected!"; sid:1000002; pcre:"/doan\.local/i";)
+    content và pcre là tên website 
 
------ ----- 
+----- kịch bản: FIN scan ----- 
+    FIN scan dùng để scan port, nếu port đóng thì server gửi gói RST, nếu port mở thì server không gửi gì về
+    alert tcp $EXTERNAL_NET any -> 10.0.0.4 22 (msg:"Nmap FIN Scan"; flags:F; sid:1000003;)
+    
+    nmap -sF -p22 10.0.0.4
 
 
+----- kịch bản: TCP SYN flood -----
+    alert tcp $EXTERNAL_NET any -> 10.0.0.4 80 (flags: S; msg:"Possible TCP DoS"; flow: stateless; detection_filter: track by_src, count 10, seconds 1; sid:1000004;)
 
+    hping3 -S -p 80 --flood 10.0.0.4
+
+kichban4_SYN_flood.rules
 sudo /usr/local/bin/snort -A console -q -u snort -g snort -c /etc/snort/snort.conf -i ens33
 
 
------ -----
+
 ----- -----
 ----- -----

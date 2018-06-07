@@ -1,0 +1,50 @@
+----- link video ----- 
+    https://drive.google.com/open?id=1AKtiyh7PTgzkZVpX3-wAPWrHcDRebrM3
+
+
+----- ip static route -----
+    static route: 
+        sudo ip route add 192.168.10.0/24 via 192.168.11.20 dev eth0
+        sudo ip route add 192.168.11.0/24 via 192.168.10.21 dev ens33
+    ip_forward: 
+        sudo sysctl -w net.ipv4.ip_forward=1
+        /etc/sysctl.conf --> net.ipv4.ip_forward=1
+        sudo sysctl -p
+
+
+----- password apache2 -----
+    ServerAdmin webmaster@localhost
+	DocumentRoot /var/www/html
+	<Directory "/var/www/html">
+		AuthType Basic
+		AuthName "Admin only"
+		AuthUserFile /etc/apache2/.htpasswd
+		Require valid-user
+	</Directory>
+
+    $ sudo htpasswd -c /etc/apache2/.htpasswd admin
+
+    user: admin 
+    password: admin
+
+
+----- kịch bản: http brute force -----
+    nmap -script http-brute -p 80 10.0.0.4
+
+    alert tcp EXTERNAL_NET any -> 10.0.0.4 80 (msg:"Login attempt dectected";content:"Authorization"; sid:1000001;)
+    alert tcp EXTERNAL_NET any -> 10.0.0.4 80 (msg:"http-brute attempt dectected";content:"Authorization"; sid:1000001;detection_filter:track by_src, count 5, seconds 1;)
+    detection_filter:track by_src, count 5, seconds 1;
+
+
+----- kịch bản: browsing -----
+
+
+
+
+sudo /usr/local/bin/snort -A console -q -u snort -g snort -c /etc/snort/snort.conf -i ens33
+
+
+----- ----- 
+----- -----
+----- -----
+----- -----

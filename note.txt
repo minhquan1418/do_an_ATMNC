@@ -13,6 +13,9 @@
 
     sudo ip route flush table main
 
+    sudo route add -net 10.0.0.0 netmask 255.255.255.0 gw 10.0.1.2 dev eth0
+    sudo up route add -net 10.0.1.0 netmask 255.255.255.0 dev eth0
+
 
 ----- password apache2 -----
     ServerAdmin webmaster@localhost
@@ -75,17 +78,26 @@
 
     hping3 -S -p 80 --flood 10.0.0.4
 
+    
+----- thêm nfq -----
+    sudo apt-get install libnetfilter-queue-dev
 
------ cấu hình mode inline -----
-    config policy_mode:inline
+    cd daq-2.0.6
+    ./configure
+    make
+    sudo make install
 
-    config daq: afpacket
+    iptables --append FORWARD -j NFQUEUE --queue-num 0
+
+    config daq: nfq
     config daq_dir: /usr/local/lib/daq
     config daq_mode: inline
-    config daq_var: buffer_size_mb=1024
-    snort -c /etc/snort/snort.conf -i ens33:ens38 -Q -A console -q
+    config daq_var: queue=0
 
-
+    snort --daq nfq -c /etc/snort/snort.conf -Q -A console -q -d
 
 ----- -----
 sudo /usr/local/bin/snort -A console -q -u snort -g snort -c /etc/snort/snort.conf -i ens33
+
+iptables -L --line-numbers
+iptables -D INPUT 1

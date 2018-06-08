@@ -11,6 +11,8 @@
         /etc/sysctl.conf --> net.ipv4.ip_forward=1
         sudo sysctl -p
 
+    sudo ip route flush table main
+
 
 ----- password apache2 -----
     ServerAdmin webmaster@localhost
@@ -58,10 +60,17 @@
 
     hping3 -S -p 80 --flood 10.0.0.4
 
-kichban4_SYN_flood.rules
+
+----- cấu hình mode inline -----
+    config policy_mode:inline
+
+    config daq: afpacket
+    config daq_dir: /usr/local/lib/daq
+    config daq_mode: inline
+    config daq_var: buffer_size_mb=1024
+    snort -c /etc/snort/snort.conf -i ens33:ens38 -Q -A console -q
+
+
+
+----- -----
 sudo /usr/local/bin/snort -A console -q -u snort -g snort -c /etc/snort/snort.conf -i ens33
-
-
-
------ -----
------ -----

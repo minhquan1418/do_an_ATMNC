@@ -58,13 +58,18 @@
     Viễn:
     alert tcp EXTERNAL_NET any -> 10.0.0.4 80 (msg:"Login attempt dectected";content:"Authorization"; sid:1000001;)
     thêm dòng sau vào cuối /etc/snort/snort.conf:
-        rate_filter gen_id 1000001, sig_id 1000001, track by_src, count 5, seconds 1, new-action drop, timeout 100
+        rate_filter gen_id 1000001, sig_id 1000001, track by_src, count 5, seconds 1, new_action drop, timeout 100
 
 
 ----- kịch bản: browsing -----
+    IDS:
     alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"Request for doan.local detected!"; sid:1000002; content:"doan.local";)
     alert tcp $HOME_NET any -> $EXTERNAL_NET $HTTP_PORTS (msg:"Request for doan.local detected!"; sid:1000002; pcre:"/doan\.local/i";)
     content và pcre là tên website 
+
+    IPS:
+    drop tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"Request for doan.local detected!"; sid:1000002; content:"doan.local";)
+    pass tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"Request for doan.local detected!"; sid:1000003; content:"an.ngu";)
 
 ----- kịch bản: FIN scan ----- 
     FIN scan dùng để scan port, nếu port đóng thì server gửi gói RST, nếu port mở thì server không gửi gì về
@@ -72,12 +77,19 @@
     
     nmap -sF -p22 10.0.0.4
 
+    IPS:
+    drop tcp $EXTERNAL_NET any -> 10.0.0.4 22 (msg:"Nmap FIN Scan"; flags:F; sid:1000004;)
+
 
 ----- kịch bản: TCP SYN flood -----
     alert tcp $EXTERNAL_NET any -> 10.0.0.4 80 (flags: S; msg:"Possible TCP DoS"; flow: stateless; detection_filter: track by_src, count 10, seconds 1; sid:1000004;)
 
     hping3 -S -p 80 --flood 10.0.0.4
 
+    IPS:
+    alert tcp $EXTERNAL_NET any -> 10.0.0.4 80 (flags: S; msg:"Possible TCP DoS"; flow: stateless;)
+    thêm snort.conf
+        rate_filter gen_id 1000001, sig_id 1000004, track by_src, count 10, seconds 1, new_action drop, timeout 100
     
 ----- thêm nfq -----
     sudo apt-get install libnetfilter-queue-dev
